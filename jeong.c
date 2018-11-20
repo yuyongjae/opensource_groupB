@@ -1,87 +1,153 @@
-#include<stdio.h>
-#include<stdlib.h>
-#include<time.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <string.h>
+#pragma warning (disable:4996)//scanf함수는 visual studio에서 에러메세지를 동반하므로 본 메시지 추가.
+
+#define computer_num 4 // 컴퓨터랜덤 자리숫자 입력 
+#define user_num computer_num //유저랜덤자리숫자 
+#define number_counter (computer_num*2)+2
+
+
+
+int random_number(int random_number[]); //컴퓨터 랜덤함수
+int play_game_user(int number[]); //숫자입력 
+
+void number_result(int computer[], int player[], int strike_count[], int ball_count[]);
+
+/*-------------------------------------------------------------------------------------------------------------*/
 
 int main()
 {
-int user_number[4];//사용자 배열
-int strike_count[50];//시도 1회당 배열에 스트라이크 저장하기 위한 배열 선언 (정세현)
-int ball_count[50];//시도 1회당 배열에 볼 저장하기 위한 배열 선언 (정세현)
-int i=1;
-int j,k;
-int strike;
-int ball;
-int computer_number[4];//컴퓨터 배열
-int count = 0;//시도 횟수 누적 변수
 
-do{
-srand(time(NULL));
-computer_number[0]=rand()%10;
-computer_number[1]=rand()%10;
-computer_number[2]=rand()%10;
-computer_number[3]=rand()%10;
-if((computer_number[0] != computer_number[1]))
-{
-if((computer_number[1] != computer_number[2]))
-{
-if((computer_number[2] != computer_number[3]))
-{
-if((computer_number[0] != computer_number[2]))
-{
-if((computer_number[1] != computer_number[3]))
-{
-if((computer_number[0] != computer_number[3]))
-{
-if(count>=1)
-{
-printf("카운트 횟수 %d\n",count);
+	int computer[computer_num]; //컴퓨터랜덤숫자
+	random_number(computer); //함수로부터 랜덤숫자 가져옴
+	int player[user_num]; // 숫자입력 초기화 
+
+	printf("%d %d %d %d\n", computer[0], computer[1], computer[2], computer[3]);
+
+	int strike_count[number_counter] = { 0 }, ball_count[number_counter] = { 0 };
+
+	while (1)
+	{
+		play_game_user(player);
+		number_result(computer, player, strike_count, ball_count);
+	}
+
+
+	system("pause");
 }
-printf("Start Game\n");
-printf("%d %d %d %d",computer_number[0],computer_number[1],computer_number[2],computer_number[3]);
 
-						break;
-					}
+/*-------------------------------------------------------------------------------------------------------------*/
+
+
+int random_number(int random_number[])
+{
+
+	srand(time(NULL));
+
+	int i;
+
+re_number: //goto문
+
+	for (i = 0; i <= computer_num; i++) //컴퓨터 지정자리만큼 숫자랜덤지정
+	{
+		random_number[i] = rand() % 10;
+	}
+
+	int a = 0;
+
+	for (i; i <= computer_num; i++) //나머지 (컴퓨터지정숫자-1개) 만큼 배열 0부터 복사 
+	{
+		random_number[i] = random_number[a];
+		a++;
+	}
+
+	for (i = 0; i < computer_num; i++)
+	{
+		if (i == computer_num) //배열 목표지점도착시 반복문 종료 
+		{
+			break;
+		}
+		if (random_number[i] == random_number[i + 1] || random_number[i] == random_number[i + 2] || random_number[i] == random_number[i + 3])
+		{ // 1 2 3 4 전부 비교 하나라도 같으면 처음으로 
+			goto re_number;
+		}
+	}
+
+	return *random_number;
+}
+
+int play_game_user(int number[])
+{
+	static count_main = 1;
+
+	printf("%d번째 기회 !!!!\n", count_main);
+	printf("숫자를 입력해주세요 >> ");
+	fflush(stdout);
+	scanf("%d %d %d %d", &number[0], &number[1], &number[2], &number[3]);
+	count_main++;
+	return *number;
+
+}
+
+
+void number_result(int computer[], int player[], int strike_count[], int ball_count[])
+{
+
+
+	static count;
+	int j, k, m;
+
+
+	for (j = 0; j < user_num; j++)
+	{
+		for (k = 0; k < user_num; k++)
+		{
+			if (computer[j] == player[k])
+			{
+				if (j == k)
+				{
+					strike_count[count]++;
+				}
+				else
+				{
+					ball_count[count]++;
 				}
 			}
 		}
 	}
-}
-}while(1);
-do{
-printf("4개의 숫자 선택 :\n");
-fflush(stdout);
-scanf("%d %d %d",&user_number[0],&user_number[1],&user_number[2]);
-if((computer_number[0]==user_number[0])&&(computer_number[1]==user_number[1])&&(computer_number[2]==user_number[2])&&(computer_number[3]==user_number[3])) // 모두 같으면 게임끝
-{
-printf("game over \n");
-break;
-}
-else //그렇지 않으면 반복문 실행
-{
-strike =0;
-ball=0; // 변수 초기화 한 이유는 사용자가 게임도중에 시도한 횟수에따라 계속 증가를 막기위한 이유다.
-for(j=0;j<4;j++)
-{
-for(k=0;k<4;k++)
-{
-if(computer_number[j]==user_number[k]) // 처음에는 변수를 배열로 하지 않았는데 a,b,c,d,e,f 로 하면 조건이 너무 길어져서 일단 임의의 숫자랑 사용자가 선택한 숫자가 같은 조건을 만들었다.
-{
-if(j==k) //배열의 값도 같고 배열 숫서도 같으면 strike를 1추가 그렇지 않으면 ball추가
-strike++;
-else
-ball++;
-}
-}
+	for (m = 0; m <= count; m++)
+	{
+		printf("strike = %d , ball = %d ", strike_count[m], ball_count[m]);
+		printf("\n");
+	}
+	printf("\n\n");
+	printf("strike = %d , ball = %d", strike_count[count], ball_count[count]);
+	printf("\n\n\n");
+
+
+	if (strike_count[count] == 4)
+	{
+		printf("게임에 승리하셧습니다.");
+		printf("\n");
+		system("pause");
+		exit(0);
+
+	}
+
+	count++;
+
+	if (count >= 10)
+	{
+		printf("게임에 패배하셨습니다.");
+		printf("\n");
+		system("pause");
+		exit(0);
+
+	}
 }
 
-}
-strike_count[i-1]=strike;//배열 S에 스트라이크를 저장하는 데 i는 1이니까 0부터 저장하기위해서 i-1(정세현)
-ball_count[i-1]=ball;//배열 B에 볼을 저장하는 데 i는 1이니까 0부터 저장하기위해서 i-1(정세현)
 
-		for(count=1;count<=i;count++){
-printf("%d번쨰 도전결과 : %d strike, %d ball\n",count, strike_count[count-1],strike_count[count-1]);// for문을 써서 a만큼 시도 한다 시도는 i까지 시도하고 저장되어 있는 스트라이크와 볼의 배열에서 해당 값을 가져온다.(정세현)
-}
-i++;
-}while(1);
-}
-//오류발생 수정바랍니다.
+
+
