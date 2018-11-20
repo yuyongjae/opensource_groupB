@@ -97,7 +97,7 @@ int play_game_user(int number[game_size][player_num])
 	printf("%d번째 기회 !!!!  ", ++chance);
 
 
-	printf("숫자를 입력해주세요 >> ");
+	printf("숫자를 입력해주세요 >> "); // 김계홍 작업중 scanf 띄어쓰기 무시하고 입력받게 할 예정
 	scanf("%d %d %d %d", &number[count_user][0], &number[count_user][1], &number[count_user][2], &number[count_user][3]);
 	count_user++;
 
