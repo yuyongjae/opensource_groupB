@@ -3,6 +3,7 @@
 #include <time.h>
 #include <string.h>
 
+//필요한 사항 말씀해주시면 수정할게요~~
 
 #define game_size 12 //총 시도횟수 10회 +2회 여유분 (횟수 넘으면 computer 지정숫자 바뀝니다.)
 #define computer_num 4 // 컴퓨터 숫자 자릿수
