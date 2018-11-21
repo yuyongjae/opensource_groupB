@@ -1,79 +1,71 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <conio.h>
 #include <time.h>
-#include <string.h>
+#include <windows.h>
 
-//필요한 사항 말씀해주시면 수정할게요~~
 
-#define game_size 12 //총 시도횟수 10회 +2회 여유분 (횟수 넘으면 computer 지정숫자 바뀝니다.)
-#define computer_num 4 // 컴퓨터 숫자 자릿수
-#define player_num 4 //플레이어 숫자 자릿수
+#pragma warning (disable:4996)//scanf함수는 visual studio에서 에러메세지를 동반하므로 본 메시지 추가.
+#define computer_num 4 // 컴퓨터랜덤 자리숫자 입력 
+#define user_num computer_num //유저랜덤자리숫자 
+#define number_counter (computer_num*2)+2
+#define putchxy(x,y,c) {gotoxy(x,y); putch(c);}
+#define delay(n) Sleep(n)   
 
+int random_number(int random_number[]); //컴퓨터 랜덤함수
+int play_game_user(int number[]); //숫자입력 
+
+typedef enum { NOCURSOR, SOLIDCURSOR, NORMALCURSOR } CURSOR_TYPE;
+
+void gotoxy(int x, int y);
+void setcursortype(CURSOR_TYPE c);
+
+void number_result(int computer[], int player[], int strike_count[], int ball_count[]);
+
+void LoadingStage();//로딩화면
+
+void window_graphic();
 /*-------------------------------------------------------------------------------------------------------------*/
-
-
-int random_numbers(int random_number[]); //컴퓨터 랜덤함수
-int play_game_user(int number[game_size][computer_num]); //숫자입력 
-
-void number_result(int computer[], int player[game_size][player_num], int strike_count[], int ball_count[]);
-
-
-
-/*-------------------------------------------------------------------------------------------------------------*/
-
 int main()
 {
 
-	int computer[computer_num]; //컴퓨터랜덤숫자 변수입력
 
-	random_numbers(computer); //함수로부터 랜덤숫자 지정 및 변수대입
+	int computer[computer_num]; //컴퓨터랜덤숫자
+	random_number(computer); //함수로부터 랜덤숫자 가져옴
+	int player[user_num]; // 숫자입력 초기화
 
-	int player[game_size][player_num] = { {0},{0} }; // 플레이어 배열 0으로 초기화
-
-	 // 스트라이크 볼 배열 선언 및 초기화
-	int strike_count[game_size] = { 0 }, ball_count[game_size] = { 0 };
-
+	setcursortype(NOCURSOR);//커서없애기
+	LoadingStage();//로딩화면
+	system("cls");
+	printf("%d %d %d %d\n", computer[0], computer[1], computer[2], computer[3]);
+	int strike_count[number_counter] = { 0 }, ball_count[number_counter] = { 0 };
 	while (1)
 	{
-
-		play_game_user(player); // 플레이어 숫자입력 
-
-		number_result(computer, player, strike_count, ball_count); //플레이어 컴퓨터 숫자비교 
-		printf("\n\n\n\n\n");
-
+		window_graphic();
+		play_game_user(player);
+		number_result(computer, player, strike_count, ball_count);
 	}
-
-
+	system("pause");
 }
-
 /*-------------------------------------------------------------------------------------------------------------*/
-
-
-int random_numbers(int random_number[])
+int random_number(int random_number[])
 {
-
 	srand(time(NULL));
-
 	int i;
-
 re_number: //goto문
-
 	for (i = 0; i <= computer_num; i++) //컴퓨터 지정자리만큼 숫자랜덤지정
 	{
 		random_number[i] = rand() % 10;
 	}
-
 	int a = 0;
-
 	for (i; i <= computer_num; i++) //나머지 (컴퓨터지정숫자-1개) 만큼 배열 0부터 복사 
 	{
 		random_number[i] = random_number[a];
 		a++;
 	}
-
 	for (i = 0; i < computer_num; i++)
 	{
-		if (i > computer_num) //배열 목표지점도착시 반복문 종료 
+		if (i == computer_num) //배열 목표지점도착시 반복문 종료 
 		{
 			break;
 		}
@@ -82,47 +74,33 @@ re_number: //goto문
 			goto re_number;
 		}
 	}
-
 	return *random_number;
 }
-
-/*-------------------------------------------------------------------------------------------------------------*/
-
-int play_game_user(int number[game_size][player_num])
+int play_game_user(int number[])
 {
+	static count_main = 1;
 
-	static count_user = 0; //몇번쨰 기회인지 카운팅
-
-	static chance;
-	printf("%d번째 기회 !!!!  ", ++chance);
-
-
-	printf("숫자를 입력해주세요 >> "); // 김계홍 작업중 scanf 띄어쓰기 무시하고 입력받게 할 예정
-	scanf("%d %d %d %d", &number[count_user][0], &number[count_user][1], &number[count_user][2], &number[count_user][3]);
-	count_user++;
-
+	gotoxy(2, count_main + 2);
+	printf(" 숫자 입력 >> ");
+	gotoxy(2, count_main + 2);
+	printf("%d번째 기회 !!", count_main);
+	fflush(stdout);
+	scanf("%d %d %d %d", &number[0], &number[1], &number[2], &number[3]);
+	count_main++;
 	return *number;
-
 }
-
-/*-------------------------------------------------------------------------------------------------------------*/
-
-
-
-void number_result(int computer[], int player[game_size][computer_num], int strike_count[], int ball_count[])
+void number_result(int computer[], int player[], int strike_count[], int ball_count[])
 {
-
+	int y = 0;
 	static count;
-	int i, j;
-
-
-	for (i = 0; i < player_num; i++) //스트라이크 볼 카운팅 
+	int j, k, m;
+	for (j = 0; j < user_num; j++)
 	{
-		for (j = 0; j < player_num; j++)
+		for (k = 0; k < user_num; k++)
 		{
-			if (player[count][i] == computer[j])
+			if (computer[j] == player[k])
 			{
-				if (i == j)
+				if (j == k)
 				{
 					strike_count[count]++;
 				}
@@ -133,42 +111,136 @@ void number_result(int computer[], int player[game_size][computer_num], int stri
 			}
 		}
 	}
-	j = 1; // 누적카운팅인데 몇번째 도전인지 누적별 카운팅 하기위해서 씁니다.
-	for (i = 0; i <= count; i++) // 결과누적치 출력 
+	for (m = 0; m <= count; m++)
 	{
 
-		printf("%d번째 도전 %d %d %d %d --->> strike = %d , ball = %d ", j, player[i][0], player[i][1], player[i][2], player[i][3], strike_count[i], ball_count[i]);
-		j++;
-		printf("\n");
+
+
+		gotoxy(61, 9); printf(" SCORE History :");
+		gotoxy(61, m + 11); printf("%d회 strike = %d , ball = %d \n", m + 1, strike_count[m], ball_count[m]);
 	}
-	printf("\n\n");
-	printf("%d %d %d %d --->>  strike = %d , ball = %d", player[count][0], player[count][1], player[count][2], player[count][3], strike_count[count], ball_count[count]);
-	printf("\n\n\n"); //현재 결과출력 
 
-
-	if (strike_count[count] == 4) // 승리조건
+	if (strike_count[count] == 4)
 	{
 		printf("게임에 승리하셧습니다.");
-		printf("%d번 기회만에 성공하셨습니다.", count + 1);
-		printf("\n\n\n\n");
-		system("pause");
-		exit(0);
-
-	}
-	count++;
-	if (count >= 10) // 패배조건
-	{
-		printf("게임에 패배하셨습니다.\n");
-		printf("컴퓨터 지정숫자 %d %d %d %d", computer[0], computer[1], computer[2], computer[3]);
 		printf("\n");
 		system("pause");
 		exit(0);
-
 	}
+	count++;
+	if (count >= 10)
+	{
+		printf("게임에 패배하셨습니다.");
+		printf("\n");
+		system("pause");
+		exit(0);
+	}
+}
+void LoadingStage()//로딩화면 선언
+{
+	int i;
+	for (i = 0; i < 45; i++)
+	{
+		putchxy(10 + i, 5, '-');
+		delay(10);
+	}
+	for (i = 0; i < 45; i++)
+	{
+		putchxy(70 - i, 10, '-');
+		delay(10);
+	}
+	delay(800);
+	gotoxy(35, 7);
+	printf("숫");
+	delay(600);
+	gotoxy(38, 7);
+	printf("자");
+	delay(600);
+	gotoxy(41, 7);
+	printf("야");
+	delay(600);
+	gotoxy(44, 7);
+	printf("구");
+	delay(600);
+	putchxy(48, 8, 'M');
+	delay(40);
+	putchxy(49, 8, 'a');
+	delay(40);
+	putchxy(50, 8, 'd');
+	delay(40);
+	putchxy(51, 8, 'e');
+	delay(40);
+	putchxy(53, 8, 'b');
+	delay(40);
+	putchxy(54, 8, 'y');
+	delay(40);
+	gotoxy(56, 8);
+	printf("B조");
+	delay(1000);
+
+
+	gotoxy(30, 12); system("pause");
 
 }
 
-/*-------------------------------------------------------------------------------------------------------------*/
+void window_graphic() {
 
 
+	int i;
+	int y = 0;
 
+	for (i = 0; i < 60; i++)
+	{
+		putchxy(i, 0, '-');
+	}
+	for (i = 0; i < 20; i++)
+	{
+		putchxy(0, i, '|')
+	}
+	for (i = 0; i < 20; i++)
+	{
+		putchxy(60, i, '|')
+	}
+	for (i = 0; i < 60; i++)
+	{
+		putchxy(i, 20, '-')
+	}
+
+	gotoxy(61, y + 2); printf("+-  SCORE BOARD  -+ ");
+	gotoxy(61, y + 3); printf("|    S ○ ○ ○   | ");
+	gotoxy(61, y + 4); printf("|    B ○ ○ ○   | ");
+	gotoxy(61, y + 5); printf("+-----------------+ ");
+
+
+	gotoxy(61, y + 22); printf("숫자 4개를 입력하시오.");
+
+
+}
+
+void gotoxy(int x, int y)
+{
+	COORD Cur;
+	Cur.X = x;
+	Cur.Y = y;
+	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), Cur);
+}
+void setcursortype(CURSOR_TYPE c)
+{
+	CONSOLE_CURSOR_INFO CurInfo;
+
+	switch (c) {
+	case NOCURSOR:
+		CurInfo.dwSize = 1;
+		CurInfo.bVisible = FALSE;
+		break;
+	case SOLIDCURSOR:
+		CurInfo.dwSize = 100;
+		CurInfo.bVisible = TRUE;
+		break;
+	case NORMALCURSOR:
+		CurInfo.dwSize = 20;
+		CurInfo.bVisible = TRUE;
+		break;
+	}
+	SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &CurInfo);
+}
